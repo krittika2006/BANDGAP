@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Band Gap of Germanium | Four Probe Method Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #040b14;
+    --bg-panel: #070f1c;
+    --bg-card: #0a1628;
+    --accent-cyan: #00e5ff;
+    --accent-blue: #1565c0;
+    --accent-amber: #ffab00;
+    --accent-green: #00e676;
+    --accent-red: #ff1744;
+    --text-primary: #e8f4f8;
+    --text-secondary: #7ecfdf;
+    --text-dim: #3a6070;
+    --border-glow: rgba(0, 229, 255, 0.3);
+    --border-dim: rgba(0, 229, 255, 0.1);
+    --glow-sm: 0 0 8px rgba(0, 229, 255, 0.4);
+    --glow-md: 0 0 20px rgba(0, 229, 255, 0.3);
+    --glow-lg: 0 0 40px rgba(0, 229, 255, 0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(21,101,192,0.2) 0%, transparent 60%),
+      linear-gradient(180deg, rgba(0,229,255,0.03) 0%, transparent 30%);
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 48px 20px 32px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    width: 260px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    margin: 20px auto 0;
+  }
+  .lab-badge {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent-cyan);
+    background: rgba(0,229,255,0.06);
+    border: 1px solid var(--border-glow);
+    padding: 5px 18px;
+    border-radius: 2px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(22px, 4vw, 42px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(0,229,255,0.4);
+  }
+  h1 span { color: var(--accent-cyan); }
+  .subtitle {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ── THEORY SECTION ── */
+  .theory-strip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 4px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width:768px){ .theory-strip { grid-template-columns: 1fr; } }
+  .theory-item h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent-cyan);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .theory-item p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .formula-box {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid var(--border-glow);
+    border-radius: 3px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-amber);
+    text-align: center;
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:900px){ .main-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .panel-header {
+    background: rgba(0,229,255,0.05);
+    border-bottom: 1px solid var(--border-dim);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    box-shadow: var(--glow-sm);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+  }
+  .panel-body { padding: 24px; }
+
+  /* ── DIAGRAM ── */
+  #probe-diagram {
+    width: 100%;
+    height: 220px;
+    display: block;
+  }
+
+  /* ── CONTROLS ── */
+  .control-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media(max-width:480px){ .control-row { grid-template-columns: 1fr; } }
+
+  .ctrl-group label {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .ctrl-group .val-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-shadow: var(--glow-sm);
+  }
+  .ctrl-group .val-unit {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 4px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-cyan) var(--pct, 50%), rgba(0,229,255,0.1) var(--pct, 50%));
+    border-radius: 2px;
+    outline: none;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0,229,255,0.8);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  /* ── MEASUREMENT TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+  }
+  .data-table th {
+    background: rgba(0,229,255,0.07);
+    color: var(--accent-cyan);
+    letter-spacing: 1px;
+    padding: 8px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-glow);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+  .data-table td {
+    padding: 7px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-dim);
+    color: var(--text-secondary);
+    transition: background 0.2s;
+  }
+  .data-table tr:hover td { background: rgba(0,229,255,0.04); }
+  .data-table td.highlight { color: var(--accent-amber); font-weight: 600; }
+  .data-table .row-new td { animation: rowFlash 0.6s ease-out; }
+  @keyframes rowFlash {
+    from { background: rgba(0,229,255,0.15); }
+    to { background: transparent; }
+  }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 11px 22px;
+    border: 1px solid;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn:hover::before { opacity: 0.08; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: transparent;
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0,229,255,0.2);
+  }
+  .btn-primary:hover { box-shadow: 0 0 24px rgba(0,229,255,0.4); }
+
+  .btn-amber {
+    background: transparent;
+    border-color: var(--accent-amber);
+    color: var(--accent-amber);
+  }
+  .btn-green {
+    background: transparent;
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+  .btn-red {
+    background: transparent;
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+  }
+
+  /* ── GRAPH ── */
+  .graph-container {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin-top: 8px;
+  }
+  canvas#graphCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 3px;
+  }
+  .graph-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .graph-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .graph-label span { color: var(--accent-cyan); }
+
+  /* ── RESULT PANEL ── */
+  .result-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    padding: 28px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+  }
+  .result-metric {
+    text-align: center;
+    position: relative;
+  }
+  .result-metric::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 20%; bottom: 20%;
+    width: 1px;
+    background: var(--border-dim);
+  }
+  .result-metric:last-child::after { display: none; }
+
+  .result-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .result-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 700;
+    color: var(--accent-amber);
+    text-shadow: 0 0 20px rgba(255,171,0,0.4);
+  }
+  .result-unit {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-left: 4px;
+  }
+  .result-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .status-ok { color: var(--accent-green); }
+  .status-warn { color: var(--accent-amber); }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .status-indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    box-shadow: 0 0 8px var(--accent-green);
+    flex-shrink: 0;
+  }
+  .status-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* ── PROCEDURE ── */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 20px;
+  }
+  @media(max-width:600px){ .steps-grid { grid-template-columns: 1fr; } }
+  .step-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid var(--border-glow);
+    border-radius: 50%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--accent-cyan);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding-top: 4px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border-dim);
+    letter-spacing: 1px;
+  }
+  footer span { color: var(--accent-cyan); }
+
+  /* ── FLOATING PARTICLES ── */
+  .particle {
+    position: fixed;
+    width: 2px; height: 2px;
+    background: var(--accent-cyan);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    animation: floatUp 8s linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+  }
+
+  .section-spacer { margin-bottom: 20px; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Floating particles -->
+<div class="particle" style="left:5%;animation-delay:0s;animation-duration:9s"></div>
+<div class="particle" style="left:15%;animation-delay:2s;animation-duration:11s"></div>
+<div class="particle" style="left:30%;animation-delay:4s;animation-duration:8s"></div>
+<div class="particle" style="left:55%;animation-delay:1s;animation-duration:13s"></div>
+<div class="particle" style="left:72%;animation-delay:3s;animation-duration:10s"></div>
+<div class="particle" style="left:88%;animation-delay:5s;animation-duration:9s"></div>
+
+<div class="wrapper">
+<style>
+  .header-logos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.header-logos img {
+  width: 100px;
+  height: 50px;
+  object-fit: contain;
+  display: block;
+}
+</style>
+
+  <!-- HEADER -->
+ <header>
+  <div class="header-logos">
+    <img src="./logo-2.webp" alt="IEM Logo">
+    <img src="./University_of_Engineering_and_Management_Kolkata_logo.png" alt="UEM Kolkata Logo">
+  </div>
+
+  <h2><b>INSTITUTE OF ENGINEERING & MANAGEMENT</b></h2>
+  <div class="lab-badge">Physics Virtual Lab</div>
+  <h1>Band Gap of <span>Germanium</span> Semiconductor</h1>
+  <p class="subtitle">Four Probe Method · Resistivity Measurement · Energy Gap Estimation</p>
+</header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-indicator" id="statusDot"></div>
+    <span class="status-text" id="statusText">SYSTEM READY — Set temperature and current, then record measurements.</span>
+  </div>
+
+  <!-- THEORY STRIP -->
+  <div class="theory-strip">
+    <div class="theory-item">
+      <h3>Principle</h3>
+      <p>The four probe method eliminates contact resistance errors by using separate current-injecting and voltage-sensing probes. Resistivity is measured as a function of temperature to extract the band gap energy.</p>
+      <div class="formula-box">ρ = V/I × 2πs · f(W/S)</div>
+    </div>
+    <div class="theory-item">
+      <h3>Band Gap Theory</h3>
+      <p>For an intrinsic semiconductor, resistivity varies exponentially with temperature. Plotting ln(ρ) vs 1/T gives a straight line whose slope yields the band gap energy Eg.</p>
+      <div class="formula-box">ln(ρ) = Eg/2k · (1/T) + C</div>
+    </div>
+    <div class="theory-item">
+      <h3>Germanium Data</h3>
+      <p>Germanium is an ideal semiconductor for this experiment with a relatively small band gap, making it easy to observe intrinsic conduction at accessible temperatures (300–500 K).</p>
+      <div class="formula-box">Eg(Ge) ≈ 0.67 eV at 300 K</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID: Diagram + Controls -->
+  <div class="main-grid section-spacer">
+
+    <!-- PROBE DIAGRAM PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title">Four Probe Apparatus Diagram</span>
+      </div>
+      <div class="panel-body" style="padding:16px;">
+        <svg id="probe-diagram" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background -->
+          <rect width="500" height="220" fill="#040b14"/>
+          <!-- Grid lines -->
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,229,255,0.05)" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="500" height="220" fill="url(#grid)"/>
+
+          <!-- Furnace / Heating block -->
+          <rect x="60" y="120" width="380" height="55" rx="6" fill="rgba(21,101,192,0.15)" stroke="rgba(21,101,192,0.6)" stroke-width="1.5"/>
+          <text x="250" y="155" text-anchor="middle" fill="rgba(21,101,192,0.9)" font-family="Share Tech Mono" font-size="10" letter-spacing="2">HEATING BLOCK / FURNACE</text>
+
+          <!-- Germanium Sample -->
+          <rect x="130" y="108" width="240" height="28" rx="3" fill="rgba(0,229,255,0.08)" stroke="rgba(0,229,255,0.5)" stroke-width="1.5"/>
+          <text x="250" y="127" text-anchor="middle" fill="#00e5ff" font-family="Share Tech Mono" font-size="10" letter-spacing="1">GERMANIUM SAMPLE</text>
+
+          <!-- Probes -->
+          <!-- Probe 1 (Current+) -->
+          <line x1="170" y1="60" x2="170" y2="108" stroke="#ff1744" stroke-width="2"/>
+          <circle cx="170" cy="108" r="4" fill="#ff1744" filter="url(#glowR)"/>
+          <text x="170" y="52" text-anchor="middle" fill="#ff1744" font-family="Share Tech Mono" font-size="9">P₁</text>
+          <!-- Probe 2 (Voltage+) -->
+          <line x1="215" y1="60" x2="215" y2="108" stroke="#00e676" stroke-width="2"/>
+          <circle cx="215" cy="108" r="4" fill="#00e676"/>
+          <text x="215" y="52" text-anchor="middle" fill="#00e676" font-family="Share Tech Mono" font-size="9">P₂</text>
+          <!-- Probe 3 (Voltage−) -->
+          <line x1="285" y1="60" x2="285" y2="108" stroke="#00e676" stroke-width="2"/>
+          <circle cx="285" cy="108" r="4" fill="#00e676"/>
+          <text x="285" y="52" text-anchor="middle" fill="#00e676" font-family="Share Tech Mono" font-size="9">P₃</text>
+          <!-- Probe 4 (Current−) -->
+          <line x1="330" y1="60" x2="330" y2="108" stroke="#ff1744" stroke-width="2"/>
+          <circle cx="330" cy="108" r="4" fill="#ff1744"/>
+          <text x="330" y="52" text-anchor="middle" fill="#ff1744" font-family="Share Tech Mono" font-size="9">P₄</text>
+
+          <!-- Current flow arrow -->
+          <defs>
+            <marker id="arrowR" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L0,8 L8,4 Z" fill="#ff1744"/>
+            </marker>
+            <marker id="arrowC" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L0,8 L8,4 Z" fill="#00e5ff"/>
+            </marker>
+            <filter id="glowR">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- I+ label -->
+          <text x="155" y="85" fill="#ff1744" font-family="Share Tech Mono" font-size="9">I+</text>
+          <!-- I− label -->
+          <text x="335" y="85" fill="#ff1744" font-family="Share Tech Mono" font-size="9">I−</text>
+          <!-- V label -->
+          <text x="245" y="50" fill="#00e676" font-family="Share Tech Mono" font-size="9">V</text>
+          <!-- V measurement line -->
+          <line x1="215" y1="55" x2="285" y2="55" stroke="#00e676" stroke-width="1" stroke-dasharray="4,3"/>
+
+          <!-- Current Source box -->
+          <rect x="80" y="10" width="80" height="28" rx="3" fill="rgba(255,23,68,0.08)" stroke="rgba(255,23,68,0.5)" stroke-width="1"/>
+          <text x="120" y="28" text-anchor="middle" fill="#ff1744" font-family="Share Tech Mono" font-size="9" letter-spacing="1">CURR. SRC</text>
+          <!-- Connect to probe 1 -->
+          <line x1="120" y1="38" x2="170" y2="55" stroke="#ff1744" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- Connect to probe 4 -->
+          <line x1="160" y1="24" x2="330" y2="55" stroke="#ff1744" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Voltmeter box -->
+          <rect x="335" y="10" width="80" height="28" rx="3" fill="rgba(0,230,118,0.08)" stroke="rgba(0,230,118,0.5)" stroke-width="1"/>
+          <text x="375" y="28" text-anchor="middle" fill="#00e676" font-family="Share Tech Mono" font-size="9" letter-spacing="1">VOLTMETER</text>
+          <line x1="335" y1="24" x2="285" y2="55" stroke="#00e676" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="375" y1="38" x2="215" y2="55" stroke="#00e676" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Probe spacing label -->
+          <line x1="170" y1="175" x2="215" y2="175" stroke="rgba(0,229,255,0.4)" stroke-width="1"/>
+          <text x="192" y="192" text-anchor="middle" fill="rgba(0,229,255,0.6)" font-family="Share Tech Mono" font-size="8">s = 2mm</text>
+
+          <!-- Thermometer symbol -->
+          <rect x="420" y="118" width="12" height="45" rx="6" fill="none" stroke="rgba(255,171,0,0.6)" stroke-width="1.5"/>
+          <circle cx="426" cy="168" r="7" fill="none" stroke="rgba(255,171,0,0.6)" stroke-width="1.5"/>
+          <rect x="424" y="128" width="4" height="35" rx="2" fill="rgba(255,171,0,0.4)"/>
+          <text x="438" y="148" fill="rgba(255,171,0,0.8)" font-family="Share Tech Mono" font-size="8">T</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- CONTROLS PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title">Experiment Controls</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="control-row">
+          <!-- Temperature -->
+          <div class="ctrl-group">
+            <label>Temperature</label>
+            <div><span class="val-display" id="tempVal">300</span><span class="val-unit">K</span></div>
+            <input type="range" id="tempSlider" min="300" max="500" step="5" value="300">
+          </div>
+          <!-- Current -->
+          <div class="ctrl-group">
+            <label>Probe Current</label>
+            <div><span class="val-display" id="currVal">5.0</span><span class="val-unit">mA</span></div>
+            <input type="range" id="currSlider" min="1" max="20" step="0.5" value="5">
+          </div>
+        </div>
+
+        <div class="control-row">
+          <!-- Probe spacing -->
+          <div class="ctrl-group">
+            <label>Probe Spacing (s)</label>
+            <div><span class="val-display" id="spacingVal">2.0</span><span class="val-unit">mm</span></div>
+            <input type="range" id="spacingSlider" min="1" max="5" step="0.5" value="2">
+          </div>
+          <!-- Sample thickness -->
+          <div class="ctrl-group">
+            <label>Sample Thickness</label>
+            <div><span class="val-display" id="thickVal">1.0</span><span class="val-unit">mm</span></div>
+            <input type="range" id="thickSlider" min="0.5" max="3" step="0.1" value="1">
+          </div>
+        </div>
+
+        <!-- Live readings -->
+        <div style="background:rgba(0,229,255,0.03);border:1px solid var(--border-dim);border-radius:4px;padding:14px 18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+          <div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Voltage V</div>
+            <div style="font-family:'Orbitron';font-size:16px;color:#00e676;" id="voltReading">—</div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);">mV</div>
+          </div>
+          <div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Resistivity ρ</div>
+            <div style="font-family:'Orbitron';font-size:16px;color:var(--accent-amber);" id="rhoReading">—</div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);">Ω·cm</div>
+          </div>
+          <div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">ln(ρ)</div>
+            <div style="font-family:'Orbitron';font-size:16px;color:var(--accent-cyan);" id="lnRhoReading">—</div>
+            <div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-dim);">&nbsp;</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="recordMeasurement()">⊕ Record Reading</button>
+          <button class="btn btn-amber" onclick="autoFill()">⚡ Auto Fill Table</button>
+          <button class="btn btn-red" onclick="clearAll()">✕ Clear All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVATION TABLE + GRAPH -->
+  <div class="main-grid section-spacer">
+
+    <!-- DATA TABLE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title">Observation Table</span>
+      </div>
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>T (K)</th>
+              <th>1/T (×10⁻³ K⁻¹)</th>
+              <th>I (mA)</th>
+              <th>V (mV)</th>
+              <th>ρ (Ω·cm)</th>
+              <th>ln(ρ)</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody">
+            <tr><td colspan="7" style="color:var(--text-dim);font-size:11px;padding:20px;">No data recorded yet. Set parameters and click Record.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--border-dim);">
+        <button class="btn btn-green" onclick="calculateBandGap()" style="font-size:10px;">▶ Calculate Band Gap</button>
+        <button class="btn btn-amber" onclick="downloadCSV()" style="font-size:10px;margin-left:10px;">↓ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- GRAPH PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title">ln(ρ) vs 1/T Graph</span>
+      </div>
+      <div class="panel-body" style="padding:16px;">
+        <div class="graph-container">
+          <canvas id="graphCanvas"></canvas>
+        </div>
+        <div class="graph-labels">
+          <span class="graph-label">X: <span>1/T (×10⁻³ K⁻¹)</span></span>
+          <span class="graph-label">Y: <span>ln(ρ)</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div class="result-panel section-spacer" id="resultPanel" style="display:none;">
+    <div class="result-metric">
+      <div class="result-label">Slope of ln(ρ) vs 1/T</div>
+      <div class="result-value" id="resSlope">—</div>
+      <div class="result-note">Eg/2k (K)</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-label">Band Gap Energy Eg</div>
+      <div class="result-value" id="resEg">—<span class="result-unit">eV</span></div>
+      <div class="result-note">Calculated from slope</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-label">Standard Value (Ge)</div>
+      <div class="result-value" style="color:var(--accent-green);">0.67<span class="result-unit">eV</span></div>
+      <div class="result-note">At 300 K</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-label">% Error</div>
+      <div class="result-value" id="resError">—<span class="result-unit">%</span></div>
+      <div class="result-note" id="resStatus">—</div>
+    </div>
+  </div>
+
+  <!-- PROCEDURE SECTION -->
+  <div class="panel section-spacer">
+    <div class="panel-header">
+      <div class="panel-dot"></div>
+      <span class="panel-title">Procedure</span>
+    </div>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">Place the Germanium crystal (n-type or p-type) on the four-probe arrangement and ensure good contact between probes and the sample surface.</div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">Connect current source to outer probes (P₁ and P₄) and voltmeter to inner probes (P₂ and P₃). Record probe spacing 's'.</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Set initial temperature to 300 K using the temperature controller and allow the sample to reach thermal equilibrium.</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Pass a constant current I through outer probes. Note the voltage V across inner probes from the voltmeter.</div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text">Calculate resistivity ρ = (V/I) × 2πs × G(W/S), where G(W/S) is the geometric correction factor for sample thickness W.</div></div>
+      <div class="step-item"><div class="step-num">6</div><div class="step-text">Increase temperature in steps of 10–20 K up to 500 K. Record V at each temperature. Compute ρ and ln(ρ) for each reading.</div></div>
+      <div class="step-item"><div class="step-num">7</div><div class="step-text">Plot ln(ρ) on Y-axis vs 1/T (×10⁻³ K⁻¹) on X-axis. Draw best-fit straight line through the linear region.</div></div>
+      <div class="step-item"><div class="step-num">8</div><div class="step-text">Calculate slope m of the graph. Band gap Eg = 2k × m, where k = 8.617 × 10⁻⁵ eV/K (Boltzmann constant).</div></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>Band Gap of Semiconductor · Four Probe Method</span> · Virtual Physics Lab · Germanium (Ge) Experiment<br>
+    <span style="font-size:10px;margin-top:6px;display:block;">Eg(theoretical) = 0.67 eV | k = 8.617 × 10⁻⁵ eV/K | Method: Intrinsic Resistivity vs Temperature</span>
+  </footer>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── Physics constants ──
+const k_eV = 8.617e-5;   // eV/K
+const k_J  = 1.381e-23;  // J/K
+const EG_GE = 0.67;      // eV — actual band gap of Ge at 300K
+const RHO0 = 0.0047;     // Ω·m pre-exponential (fitted for Ge)
+
+// ── State ──
+let tableData = [];
+let noiseLevel = 0.02;    // ±2% realistic noise
+
+// ── Utility ──
+function noise() { return 1 + (Math.random() - 0.5) * 2 * noiseLevel; }
+
+// Correction factor G(W/S) for finite sample — simplified approximation
+function correctionFactor(W_mm, s_mm) {
+  const ratio = W_mm / s_mm;
+  if (ratio < 0.5) return 1 / (2 * Math.log(2)); // thin sample limit
+  return 1.0; // thick sample approximation
+}
+
+// Compute resistivity of intrinsic Ge at temperature T
+function calcRho(T, s_mm, W_mm) {
+  // ρ = ρ₀ · exp(Eg / 2kT)
+  const rho_SI = RHO0 * Math.exp(EG_GE / (2 * k_eV * T)) * noise();
+  return rho_SI * 100; // Ω·cm
+}
+
+// Compute voltage across inner probes
+function calcVoltage(I_mA, rho_Ohm_cm, s_mm) {
+  const I = I_mA * 1e-3;
+  const s = s_mm * 1e-3;
+  const rho = rho_Ohm_cm * 0.01;
+  // V = I * rho / (2*pi*s)
+  const V = I * rho / (2 * Math.PI * s);
+  return V * 1000; // mV
+}
+
+// ── Slider → display ──
+function updateSlider(slider) {
+  const val = parseFloat(slider.value);
+  const pct = ((val - slider.min) / (slider.max - slider.min)) * 100;
+  slider.style.setProperty('--pct', pct + '%');
+}
+
+function initSliders() {
+  ['tempSlider','currSlider','spacingSlider','thickSlider'].forEach(id => {
+    const el = document.getElementById(id);
+    updateSlider(el);
+    el.addEventListener('input', () => { updateSlider(el); liveUpdate(); });
+  });
+}
+
+function liveUpdate() {
+  const T = parseFloat(document.getElementById('tempSlider').value);
+  const I = parseFloat(document.getElementById('currSlider').value);
+  const s = parseFloat(document.getElementById('spacingSlider').value);
+  const W = parseFloat(document.getElementById('thickSlider').value);
+
+  document.getElementById('tempVal').textContent = T;
+  document.getElementById('currVal').textContent = I.toFixed(1);
+  document.getElementById('spacingVal').textContent = s.toFixed(1);
+  document.getElementById('thickVal').textContent = W.toFixed(1);
+
+  const rho = calcRho(T, s, W);
+  const V   = calcVoltage(I, rho, s);
+  const lnR = Math.log(rho);
+
+  document.getElementById('voltReading').textContent = V.toFixed(3);
+  document.getElementById('rhoReading').textContent  = rho.toFixed(4);
+  document.getElementById('lnRhoReading').textContent = lnR.toFixed(4);
+
+  setStatus(`T = ${T} K | ρ = ${rho.toFixed(4)} Ω·cm | V = ${V.toFixed(3)} mV`, 'ok');
+}
+
+function setStatus(msg, type='ok') {
+  document.getElementById('statusText').textContent = msg.toUpperCase();
+  document.getElementById('statusDot').style.background =
+    type === 'ok' ? 'var(--accent-green)' : type === 'warn' ? 'var(--accent-amber)' : 'var(--accent-red)';
+}
+
+// ── Record measurement ──
+function recordMeasurement() {
+  const T = parseFloat(document.getElementById('tempSlider').value);
+  const I = parseFloat(document.getElementById('currSlider').value);
+  const s = parseFloat(document.getElementById('spacingSlider').value);
+  const W = parseFloat(document.getElementById('thickSlider').value);
+
+  const rho = calcRho(T, s, W);
+  const V   = calcVoltage(I, rho, s);
+  const inv_T = (1/T) * 1e3;
+  const lnR = Math.log(rho);
+
+  tableData.push({ T, invT: inv_T, I, V, rho, lnR });
+  renderTable();
+  drawGraph();
+  setStatus(`Reading recorded: T = ${T} K, ρ = ${rho.toFixed(4)} Ω·cm`, 'ok');
+}
+
+// ── Auto fill ──
+function autoFill() {
+  tableData = [];
+  const s = parseFloat(document.getElementById('spacingSlider').value);
+  const W = parseFloat(document.getElementById('thickSlider').value);
+  const I = 5.0;
+  const temps = [300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500];
+  temps.forEach(T => {
+    const rho = calcRho(T, s, W);
+    const V   = calcVoltage(I, rho, s);
+    tableData.push({ T, invT: (1/T)*1e3, I, V, rho, lnR: Math.log(rho) });
+  });
+  renderTable();
+  drawGraph();
+  setStatus('Auto-filled 11 readings from 300 K to 500 K', 'ok');
+}
+
+// ── Render table ──
+function renderTable() {
+  const tbody = document.getElementById('dataTableBody');
+  if (tableData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-dim);font-size:11px;padding:20px;">No data recorded yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tableData.map((r, i) => `
+    <tr class="${i === tableData.length - 1 ? 'row-new' : ''}">
+      <td>${i+1}</td>
+      <td>${r.T}</td>
+      <td class="highlight">${r.invT.toFixed(4)}</td>
+      <td>${r.I.toFixed(1)}</td>
+      <td>${r.V.toFixed(4)}</td>
+      <td>${r.rho.toFixed(5)}</td>
+      <td class="highlight">${r.lnR.toFixed(5)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Draw graph ──
+function drawGraph() {
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 600;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio || 320;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+
+  // Clear
+  ctx.fillStyle = '#070f1c';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = { t: 20, r: 20, b: 50, l: 60 };
+  const gW = W - pad.l - pad.r;
+  const gH = H - pad.t - pad.b;
+
+  if (tableData.length < 2) {
+    ctx.fillStyle = 'rgba(0,229,255,0.2)';
+    ctx.font = '12px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('Record at least 2 data points to plot graph.', W/2, H/2);
+    return;
+  }
+
+  const xs = tableData.map(r => r.invT);
+  const ys = tableData.map(r => r.lnR);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const yMin = Math.min(...ys) - 0.5, yMax = Math.max(...ys) + 0.5;
+
+  const toX = v => pad.l + (v - xMin) / (xMax - xMin) * gW;
+  const toY = v => pad.t + gH - (v - yMin) / (yMax - yMin) * gH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,229,255,0.07)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.t + (gH / 5) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + gW, y); ctx.stroke();
+    const x = pad.l + (gW / 5) * i;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + gH); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(0,229,255,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + gH);
+  ctx.moveTo(pad.l, pad.t + gH); ctx.lineTo(pad.l + gW, pad.t + gH);
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(0,229,255,0.5)';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 5; i++) {
+    const v = xMin + (xMax - xMin) / 5 * i;
+    ctx.fillText(v.toFixed(3), pad.l + gW/5 * i, pad.t + gH + 18);
+    const yv = yMin + (yMax - yMin) / 5 * i;
+    ctx.textAlign = 'right';
+    ctx.fillText(yv.toFixed(2), pad.l - 6, pad.t + gH - gH/5 * i + 3);
+    ctx.textAlign = 'center';
+  }
+
+  // Best-fit line
+  let sx = 0, sy = 0, sxy = 0, sx2 = 0, n = tableData.length;
+  xs.forEach((x, i) => { sx += x; sy += ys[i]; sxy += x * ys[i]; sx2 += x*x; });
+  const slope = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
+  const intercept = (sy - slope * sx) / n;
+
+  ctx.strokeStyle = 'rgba(255,171,0,0.7)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(slope * xMin + intercept));
+  ctx.lineTo(toX(xMax), toY(slope * xMax + intercept));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Data points
+  tableData.forEach(r => {
+    const x = toX(r.invT), y = toY(r.lnR);
+    ctx.fillStyle = '#00e5ff';
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  // Slope annotation
+  const Eg = 2 * k_eV * slope * 1e3;
+  ctx.fillStyle = 'rgba(255,171,0,0.85)';
+  ctx.font = 'bold 11px Share Tech Mono';
+  ctx.textAlign = 'right';
+  ctx.fillText(`slope = ${slope.toFixed(1)} K  →  Eg ≈ ${Math.abs(Eg).toFixed(4)} eV`, pad.l + gW - 4, pad.t + 16);
+}
+
+// ── Calculate band gap ──
+function calculateBandGap() {
+  if (tableData.length < 3) {
+    setStatus('Need at least 3 data points to calculate band gap!', 'warn'); return;
+  }
+  const xs = tableData.map(r => r.invT);
+  const ys = tableData.map(r => r.lnR);
+  let sx=0, sy=0, sxy=0, sx2=0, n=tableData.length;
+  xs.forEach((x,i) => { sx+=x; sy+=ys[i]; sxy+=x*ys[i]; sx2+=x*x; });
+  const slope = (n*sxy - sx*sy) / (n*sx2 - sx*sx);
+
+  const Eg = Math.abs(2 * k_eV * slope * 1e3); // ×10³ because invT in ×10⁻³
+  const err = Math.abs((Eg - EG_GE) / EG_GE * 100);
+
+  document.getElementById('resSlope').textContent = slope.toFixed(2);
+  document.getElementById('resEg').innerHTML = `${Eg.toFixed(4)}<span class="result-unit">eV</span>`;
+  document.getElementById('resError').innerHTML = `${err.toFixed(2)}<span class="result-unit">%</span>`;
+  document.getElementById('resStatus').textContent = err < 5 ? '✓ Excellent result' : err < 10 ? '~ Good result' : '! Check readings';
+  document.getElementById('resStatus').className = 'result-note ' + (err < 5 ? 'status-ok' : 'status-warn');
+  document.getElementById('resultPanel').style.display = 'grid';
+  setStatus(`Band gap calculated: Eg = ${Eg.toFixed(4)} eV (error: ${err.toFixed(2)}%)`, 'ok');
+}
+
+// ── Clear ──
+function clearAll() {
+  tableData = [];
+  renderTable();
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#070f1c';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  document.getElementById('resultPanel').style.display = 'none';
+  ['voltReading','rhoReading','lnRhoReading'].forEach(id => document.getElementById(id).textContent = '—');
+  setStatus('Table cleared. Ready for new experiment.', 'ok');
+}
+
+// ── Export CSV ──
+function downloadCSV() {
+  if (!tableData.length) { setStatus('No data to export!','warn'); return; }
+  const header = ['#','T(K)','1/T(x10^-3 K^-1)','I(mA)','V(mV)','rho(Ohm·cm)','ln(rho)'];
+  const rows = tableData.map((r,i) =>
+    [i+1, r.T, r.invT.toFixed(5), r.I.toFixed(1), r.V.toFixed(5), r.rho.toFixed(6), r.lnR.toFixed(6)].join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'bandgap_germanium_data.csv';
+  a.click();
+}
+
+// ── Init ──
+window.addEventListener('load', () => {
+  initSliders();
+  liveUpdate();
+});
+
+window.addEventListener('resize', () => {
+  if (tableData.length > 0) drawGraph();
+});
+</script>
+</body>
+</html>
